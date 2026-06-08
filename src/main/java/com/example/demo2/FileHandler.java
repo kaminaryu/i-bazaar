@@ -1,3 +1,4 @@
+// FileHandler — reads and writes CSV files to save products and carts between app runs
 package com.example.demo2;
 
 import java.io.*;
@@ -9,6 +10,7 @@ public class FileHandler {
     private static final String GLOBAL_FILE = DIR + "global_catalog.csv";
     private static final String CART_FILE = DIR + "user_cart.csv";
 
+    // add a new product
     public static void saveItem(String itemId, String name, double price, int stock, String sellerMatric) {
         try (FileWriter fw = new FileWriter(GLOBAL_FILE, true);
              BufferedWriter bw = new BufferedWriter(fw)) {
@@ -21,6 +23,7 @@ public class FileHandler {
         }
     }
 
+    // read items from global catalog and convert to string
     public static List<String> readAllItems() {
         List<String> items = new ArrayList<>();
 
@@ -40,6 +43,7 @@ public class FileHandler {
         return items;
     }
 
+    // replace the entire global_catalog.csv with a new list (for edit/delete)
     public static void overwriteCatalog(List<Product> products) {
         try (FileWriter fw = new FileWriter(GLOBAL_FILE);
              BufferedWriter bw = new BufferedWriter(fw)) {
@@ -54,6 +58,7 @@ public class FileHandler {
         }
     }
 
+    // add items to cart
     public static void addToCart(String userMatric, String itemId, int quantity) {
         try (FileWriter fw = new FileWriter(CART_FILE, true);
              BufferedWriter bw = new BufferedWriter(fw)) {
@@ -66,6 +71,7 @@ public class FileHandler {
         }
     }
 
+    // get user's item using matric card
     public static List<String> getUserCart(String userMatric) {
         List<String> cart = new ArrayList<>();
 
@@ -85,9 +91,11 @@ public class FileHandler {
         return cart;
     }
 
+    // delete user's card ikut matric card, for checkout usually
     public static void clearUserCart(String userMatric) {
         List<String> remaining = new ArrayList<>();
 
+        // read all lines that doesnt have user matric num
         try (BufferedReader br = new BufferedReader(new FileReader(CART_FILE))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -99,6 +107,7 @@ public class FileHandler {
             System.out.println("Error reading cart: " + e.getMessage());
         }
 
+        // write the remaining lines back
         try (FileWriter fw = new FileWriter(CART_FILE);
              BufferedWriter bw = new BufferedWriter(fw)) {
             for (String entry : remaining) {

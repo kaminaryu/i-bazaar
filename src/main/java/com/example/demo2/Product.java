@@ -5,7 +5,7 @@ public class Product {
     private String productName;
     private double price;
     private int stock;
-    private String sellerMatric;
+    private String sellerMatric; // matric number of the seller who uploaded this
 
     public Product(String productID, String productName, double price, int stock, String sellerMatric) {
         this.productID = productID;
@@ -32,10 +32,12 @@ public class Product {
     public int getStock() { return stock; }
     public String getSellerMatric() { return sellerMatric; }
 
+    // convert Object into csv
     public String toFileString() {
         return productID + "," + productName + "," + price + "," + stock + "," + sellerMatric;
     }
 
+    // convert csv into Object
     public static Product fromFileString(String line) {
         String[] parts = line.split(",");
         return new Product(parts[0], parts[1], Double.parseDouble(parts[2]),

@@ -10,6 +10,7 @@ public class HelloApplication extends Application {
     public static Stage primaryStage;
     public static final ArrayList<Product> globalCatalog = new ArrayList<>();
 
+    // run the JavaFX application
     public static void main(String[] args) {
         launch(args);
     }
@@ -20,12 +21,16 @@ public class HelloApplication extends Application {
         primaryStage.setTitle("i-Bazaar");
         primaryStage.setResizable(false);
 
+        // read all product from global catalog
         List<String> lines = FileHandler.readAllItems();
         for (String line : lines) {
             globalCatalog.add(Product.fromFileString(line));
         }
 
+        // show the login screen
         LoginScreen.show();
+
+        // then make the window visible
         primaryStage.show();
     }
 }

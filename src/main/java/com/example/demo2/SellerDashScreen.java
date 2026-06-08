@@ -6,7 +6,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
 import java.util.List;
-import java.util.Optional;
 
 public class SellerDashScreen {
 
@@ -15,7 +14,9 @@ public class SellerDashScreen {
 
     private static VBox productListBox;
 
+    // find all products in the global catalog that belong to this seller
     public static void show(Seller seller) {
+        // delete any old data to be replaced
         seller.getShopCatalog().clear();
         for (Product p : HelloApplication.globalCatalog) {
             if (p.getSellerMatric().equals(seller.getMatricNum())) {
@@ -23,6 +24,7 @@ public class SellerDashScreen {
             }
         }
 
+        // main layout
         BorderPane root = new BorderPane();
         root.setPrefSize(400, 700);
         root.setStyle("-fx-background-color: " + BG + ";");
@@ -35,15 +37,18 @@ public class SellerDashScreen {
     }
 
     private static HBox buildHeader(Seller seller) {
+        // header format
         HBox header = new HBox(10);
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPadding(new Insets(16, 20, 16, 20));
         header.setStyle("-fx-background-color: " + NAVY + ";");
 
+        // add i-bazaar title
         Label title = new Label("i-Bazaar");
         title.setFont(Font.font("System", FontWeight.BOLD, 22));
         title.setStyle("-fx-text-fill: white;");
 
+        // add seller badge label
         Label badge = new Label(" SELLER ");
         badge.setStyle(
             "-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #BB86FC;" +
@@ -54,6 +59,7 @@ public class SellerDashScreen {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        // add label to the right
         Label shopName = new Label(seller.getName() + "'s Shop");
         shopName.setStyle("-fx-text-fill: rgba(255,255,255,0.55); -fx-font-size: 12px;");
 
@@ -61,9 +67,11 @@ public class SellerDashScreen {
         return header;
     }
 
+    // show products that have been uploaded by seller
     private static VBox buildProductSection(Seller seller) {
         VBox section = new VBox();
 
+        // add title
         HBox titleRow = new HBox();
         titleRow.setAlignment(Pos.CENTER_LEFT);
         titleRow.setPadding(new Insets(16, 16, 8, 16));
@@ -75,6 +83,7 @@ public class SellerDashScreen {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        // add upload button
         Button addBtn = new Button("＋ Add Product");
         addBtn.setStyle(
             "-fx-background-color: rgba(255,255,255,0.18);" +
@@ -90,6 +99,7 @@ public class SellerDashScreen {
 
         titleRow.getChildren().addAll(title, spacer, addBtn);
 
+        // product list grid
         productListBox = new VBox(10);
         productListBox.setPadding(new Insets(8, 16, 16, 16));
         productListBox.setStyle("-fx-background-color: " + BG + ";");
@@ -108,11 +118,14 @@ public class SellerDashScreen {
         return section;
     }
 
+    // render user's uploaded items
     private static void refreshList(Seller seller) {
+        // delete to be replaced
         productListBox.getChildren().clear();
 
         List<Product> shop = seller.getShopCatalog();
 
+        // defautl text if no products
         if (shop.isEmpty()) {
             Label empty = new Label("No products yet.\nTap '＋ Add Product' to start selling!");
             empty.setStyle("-fx-text-fill: rgba(255,255,255,0.45); -fx-font-size: 13px;");
@@ -121,12 +134,15 @@ public class SellerDashScreen {
             return;
         }
 
+        // add product list
         for (Product p : shop) {
             productListBox.getChildren().add(buildProductRow(p, seller));
         }
     }
 
+    // add product list
     private static HBox buildProductRow(Product p, Seller seller) {
+        // item container
         HBox row = new HBox(10);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(12, 14, 12, 14));
@@ -135,6 +151,7 @@ public class SellerDashScreen {
             "-fx-background-radius: 12;"
         );
 
+        // add product info
         VBox info = new VBox(3);
         Label nameLbl = new Label(p.getProductName());
         nameLbl.setFont(Font.font("System", FontWeight.BOLD, 14));
@@ -149,6 +166,7 @@ public class SellerDashScreen {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        // edit button
         Button editBtn = new Button("✎");
         editBtn.setStyle(
             "-fx-background-color: rgba(255,255,255,0.18); -fx-text-fill: white;" +
@@ -157,6 +175,7 @@ public class SellerDashScreen {
         );
         editBtn.setOnAction(e -> showEditDialog(p, seller));
 
+        // delete button
         Button delBtn = new Button("✕");
         delBtn.setStyle(
             "-fx-background-color: #CC3333; -fx-text-fill: white;" +
@@ -169,6 +188,7 @@ public class SellerDashScreen {
         return row;
     }
 
+    // popup with form fields to create a new product and save it to database
     private static void showAddDialog(Seller seller) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Add New Product");
@@ -177,6 +197,7 @@ public class SellerDashScreen {
         ButtonType addBtn = new ButtonType("Add Product", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addBtn, ButtonType.CANCEL);
 
+        // grid form with ID, name, price, and stock fields
         GridPane form = new GridPane();
         form.setHgap(10);
         form.setVgap(10);
@@ -194,18 +215,20 @@ public class SellerDashScreen {
 
         dialog.getDialogPane().setContent(form);
 
-        Optional<ButtonType> result = dialog.showAndWait();
-        if (result.isPresent() && result.get() == addBtn) {
+        ButtonType result = dialog.showAndWait().orElse(null);
+        if (result == addBtn) {
             try {
                 String id    = idField.getText().trim();
                 String name  = nameField.getText().trim();
                 double price = Double.parseDouble(priceField.getText().trim());
                 int    stock = Integer.parseInt(stockField.getText().trim());
 
+                // basic validation — ID and name cannot be empty
                 if (id.isEmpty() || name.isEmpty()) {
                     alert("All fields are required."); return;
                 }
 
+                // create product, add to in-memory lists, and save to CSV
                 Product newProd = new Product(id, name, price, stock, seller.getMatricNum());
                 seller.getShopCatalog().add(newProd);
                 HelloApplication.globalCatalog.add(newProd);
@@ -218,6 +241,7 @@ public class SellerDashScreen {
         }
     }
 
+    // popup to change the price and stock of an existing product
     private static void showEditDialog(Product p, Seller seller) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Edit: " + p.getProductName());
@@ -226,6 +250,7 @@ public class SellerDashScreen {
         ButtonType saveBtn = new ButtonType("Save Changes", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveBtn, ButtonType.CANCEL);
 
+        // form pre-filled with current price and stock
         GridPane form = new GridPane();
         form.setHgap(10);
         form.setVgap(10);
@@ -239,11 +264,12 @@ public class SellerDashScreen {
 
         dialog.getDialogPane().setContent(form);
 
-        Optional<ButtonType> result = dialog.showAndWait();
-        if (result.isPresent() && result.get() == saveBtn) {
+        ButtonType result = dialog.showAndWait().orElse(null);
+        if (result == saveBtn) {
             try {
                 double newPrice = Double.parseDouble(priceField.getText().trim());
                 int    newStock = Integer.parseInt(stockField.getText().trim());
+                // update the product in memory and rewrite the entire catalog CSV
                 p.setPrice(newPrice);
                 p.updateStock(newStock - p.getStock());
                 FileHandler.overwriteCatalog(HelloApplication.globalCatalog);
@@ -254,14 +280,16 @@ public class SellerDashScreen {
         }
     }
 
+    // ask the seller to confirm, then remove from lists and CSV
     private static void confirmDelete(Product p, Seller seller) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Delete Product");
         confirm.setHeaderText("Delete \"" + p.getProductName() + "\"?");
         confirm.setContentText("This will remove it from the marketplace.");
 
-        Optional<ButtonType> result = confirm.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
+        ButtonType result = confirm.showAndWait().orElse(null);
+        if (result == ButtonType.OK) {
+            // remove from both in-memory lists, then rewrite the CSV file
             seller.getShopCatalog().remove(p);
             HelloApplication.globalCatalog.remove(p);
             FileHandler.overwriteCatalog(HelloApplication.globalCatalog);
@@ -269,6 +297,7 @@ public class SellerDashScreen {
         }
     }
 
+    // bottom bar with only a Logout button
     private static HBox buildNavBar() {
         HBox nav = new HBox();
         nav.setStyle("-fx-background-color: " + NAVY + "; -fx-padding: 10 20;");
@@ -283,6 +312,7 @@ public class SellerDashScreen {
         return nav;
     }
 
+    // flat transparent button for navigation
     private static Button makeNavBtn(String text) {
         Button btn = new Button(text);
         btn.setStyle(
@@ -292,12 +322,14 @@ public class SellerDashScreen {
         return btn;
     }
 
+    // shortcut to create a text field with a placeholder
     private static TextField tf(String prompt) {
         TextField tf = new TextField();
         tf.setPromptText(prompt);
         return tf;
     }
 
+    // show an error popup
     private static void alert(String msg) {
         new Alert(Alert.AlertType.ERROR, msg).showAndWait();
     }
