@@ -5,22 +5,31 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 public class BuyerHomeScreen {
 
     private static final String BG   = "#7B2D8B";
     private static final String NAVY = "#1A1A2E";
-
-    private static final Map<String, String> CARD_COLORS = new HashMap<>() {{
-        put("Clothing",    "#9B45CC");
-        put("Accessories", "#4A7EC7");
-        put("Books",       "#C47A3A");
-        put("Electronics", "#3A9A78");
-        put("Food",        "#B87333");
-    }};
+    private static final String CARD_COLOR = "#999999";
 
     public static void show(Buyer buyer) {
+        buyer.getCart().clear();
+        List<String> cartLines = FileHandler.getUserCart(buyer.getMatricNum());
+        for (String line : cartLines) {
+            String[] parts = line.split(",");
+            String itemId = parts[1];
+            int qty = Integer.parseInt(parts[2]);
+            for (Product p : HelloApplication.globalCatalog) {
+                if (p.getProductID().equals(itemId)) {
+                    Order order = new Order((int)(Math.random() * 999999), p, qty);
+                    buyer.getCart().add(order);
+                    break;
+                }
+            }
+        }
+
         BorderPane root = new BorderPane();
         root.setPrefSize(400, 700);
         root.setStyle("-fx-background-color: " + BG + ";");
@@ -84,13 +93,11 @@ public class BuyerHomeScreen {
     }
 
     private static VBox buildProductCard(Product p, Buyer buyer) {
-        String color = CARD_COLORS.getOrDefault(p.getCategory(), "#8B35BC");
-
         VBox card = new VBox(8);
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(12));
         card.setStyle(
-            "-fx-background-color: " + color + ";" +
+            "-fx-background-color: " + CARD_COLOR + ";" +
             "-fx-background-radius: 16;" +
             "-fx-cursor: hand;"
         );
@@ -124,7 +131,7 @@ public class BuyerHomeScreen {
     private static void showOrderDialog(Product p, Buyer buyer) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Order Item");
-        dialog.setHeaderText(p.getProductName() + "\n" + p.getCategory());
+        dialog.setHeaderText(p.getProductName());
 
         ButtonType confirmBtn = new ButtonType("Add to Cart ✓", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(confirmBtn, ButtonType.CANCEL);
@@ -152,6 +159,7 @@ public class BuyerHomeScreen {
             int qty = spinner.getValue();
             Order order = new Order((int)(Math.random() * 999999), p, qty);
             buyer.getCart().add(order);
+            FileHandler.addToCart(buyer.getMatricNum(), p.getProductID(), qty);
             showAlert(Alert.AlertType.INFORMATION,
                 qty + "x " + p.getProductName() + " added to cart! 🛒");
         }
@@ -206,6 +214,7 @@ public class BuyerHomeScreen {
             double finalTotal = total;
             checkoutBtn.setOnAction(e -> {
                 cart.clear();
+                FileHandler.clearUserCart(buyer.getMatricNum());
                 dialog.close();
                 showAlert(Alert.AlertType.INFORMATION,
                     "Order placed!\nTotal paid: RM" + String.format("%.2f", finalTotal) + " 🎉");
@@ -220,22 +229,18 @@ public class BuyerHomeScreen {
 
     private static HBox buildNavBar(Buyer buyer) {
         HBox nav = new HBox();
-        nav.setStyle("-fx-background-color: " + NAVY + "; -fx-padding: 10 0;");
-        nav.setAlignment(Pos.CENTER);
+        nav.setStyle("-fx-background-color: " + NAVY + "; -fx-padding: 10 20;");
 
-        Button homeBtn   = makeNavButton("🏠  Home");
         Button cartBtn   = makeNavButton("🛒  Cart");
         Button logoutBtn = makeNavButton("🚪  Logout");
 
         cartBtn.setOnAction(e -> showCartDialog(buyer));
         logoutBtn.setOnAction(e -> LoginScreen.show());
 
-        for (Button b : new Button[]{homeBtn, cartBtn, logoutBtn}) {
-            HBox.setHgrow(b, Priority.ALWAYS);
-            b.setMaxWidth(Double.MAX_VALUE);
-        }
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        nav.getChildren().addAll(homeBtn, cartBtn, logoutBtn);
+        nav.getChildren().addAll(cartBtn, spacer, logoutBtn);
         return nav;
     }
 

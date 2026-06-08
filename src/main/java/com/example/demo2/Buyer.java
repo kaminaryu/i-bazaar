@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Buyer extends Users {
     private ArrayList<Order> cart = new ArrayList<>();
 
-    public Buyer(String name, String matricNum, String password, ArrayList<Product> catalog) {
+    public Buyer(String name, String matricNum, String password) {
         super(name, matricNum, password);
     }
 

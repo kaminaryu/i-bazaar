@@ -5,7 +5,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
-import java.util.ArrayList;
 
 public class LoginScreen {
     private static final String PURPLE = "#6B21A8";
@@ -100,12 +99,20 @@ public class LoginScreen {
                 return;
             }
 
-            ArrayList<Product> catalog = HelloApplication.globalCatalog;
+            try {
+                Integer.parseInt(matric);
+            } catch (NumberFormatException ex) {
+                errorLbl.setText("Please input an integer for Matric Number.");
+                errorLbl.setVisible(true);
+                errorLbl.setManaged(true);
+                return;
+            }
+
             if (buyerRb.isSelected()) {
-                Buyer buyer = new Buyer(name, matric, pass, catalog);
+                Buyer buyer = new Buyer(name, matric, pass);
                 BuyerHomeScreen.show(buyer);
             } else {
-                Seller seller = new Seller(name, matric, pass, catalog);
+                Seller seller = new Seller(name, matric, pass);
                 SellerDashScreen.show(seller);
             }
         });

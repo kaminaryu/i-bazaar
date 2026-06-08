@@ -4,27 +4,15 @@ public class Product {
     private String productID;
     private String productName;
     private double price;
-    private String description;
-    private double discount;
     private int stock;
-    private String category;
+    private String sellerMatric;
 
-    public Product(String productID, String productName, double price, int stock, String category) {
-        this(productID, productName, price, "", stock, category);
-    }
-
-    public Product(String productID, String productName, double price, String description, int stock, String category) {
+    public Product(String productID, String productName, double price, int stock, String sellerMatric) {
         this.productID = productID;
         this.productName = productName;
         this.price = price;
-        this.description = description;
         this.stock = stock;
-        this.category = category;
-        this.discount = 0.0;
-    }
-
-    public void applyDiscount(double discountPercentage) {
-        this.discount = discountPercentage;
+        this.sellerMatric = sellerMatric;
     }
 
     public void updateStock(int amount) {
@@ -32,7 +20,7 @@ public class Product {
     }
 
     public double getPrice() {
-        return price * (1 - discount);
+        return price;
     }
 
     public void setPrice(double price) {
@@ -42,10 +30,15 @@ public class Product {
     public String getProductID() { return productID; }
     public String getProductName() { return productName; }
     public int getStock() { return stock; }
-    public String getCategory() { return category; }
-    public String getDetails() { return description; }
+    public String getSellerMatric() { return sellerMatric; }
 
-    public void setDetails(String details) {
-        this.description = details;
+    public String toFileString() {
+        return productID + "," + productName + "," + price + "," + stock + "," + sellerMatric;
+    }
+
+    public static Product fromFileString(String line) {
+        String[] parts = line.split(",");
+        return new Product(parts[0], parts[1], Double.parseDouble(parts[2]),
+            Integer.parseInt(parts[3]), parts.length > 4 ? parts[4] : "");
     }
 }

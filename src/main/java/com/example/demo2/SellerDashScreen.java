@@ -16,6 +16,13 @@ public class SellerDashScreen {
     private static VBox productListBox;
 
     public static void show(Seller seller) {
+        seller.getShopCatalog().clear();
+        for (Product p : HelloApplication.globalCatalog) {
+            if (p.getSellerMatric().equals(seller.getMatricNum())) {
+                seller.getShopCatalog().add(p);
+            }
+        }
+
         BorderPane root = new BorderPane();
         root.setPrefSize(400, 700);
         root.setStyle("-fx-background-color: " + BG + ";");
@@ -134,7 +141,7 @@ public class SellerDashScreen {
         nameLbl.setStyle("-fx-text-fill: white;");
 
         Label detailLbl = new Label(String.format(
-            "RM%.2f  ·  Stock: %d  ·  %s", p.getPrice(), p.getStock(), p.getCategory()));
+            "RM%.2f  ·  Stock: %d", p.getPrice(), p.getStock()));
         detailLbl.setStyle("-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.65);");
 
         info.getChildren().addAll(nameLbl, detailLbl);
@@ -179,13 +186,11 @@ public class SellerDashScreen {
         TextField nameField  = tf("Product name");
         TextField priceField = tf("e.g. 25.00");
         TextField stockField = tf("e.g. 10");
-        TextField catField   = tf("e.g. Clothing");
 
         form.add(new Label("Product ID:"), 0, 0); form.add(idField,    1, 0);
         form.add(new Label("Name:"),       0, 1); form.add(nameField,  1, 1);
         form.add(new Label("Price (RM):"), 0, 2); form.add(priceField, 1, 2);
         form.add(new Label("Stock:"),      0, 3); form.add(stockField, 1, 3);
-        form.add(new Label("Category:"),   0, 4); form.add(catField,   1, 4);
 
         dialog.getDialogPane().setContent(form);
 
@@ -196,15 +201,15 @@ public class SellerDashScreen {
                 String name  = nameField.getText().trim();
                 double price = Double.parseDouble(priceField.getText().trim());
                 int    stock = Integer.parseInt(stockField.getText().trim());
-                String cat   = catField.getText().trim();
 
-                if (id.isEmpty() || name.isEmpty() || cat.isEmpty()) {
+                if (id.isEmpty() || name.isEmpty()) {
                     alert("All fields are required."); return;
                 }
 
-                Product newProd = new Product(id, name, price, stock, cat);
+                Product newProd = new Product(id, name, price, stock, seller.getMatricNum());
                 seller.getShopCatalog().add(newProd);
                 HelloApplication.globalCatalog.add(newProd);
+                FileHandler.saveItem(id, name, price, stock, seller.getMatricNum());
                 refreshList(seller);
 
             } catch (NumberFormatException ex) {
@@ -241,6 +246,7 @@ public class SellerDashScreen {
                 int    newStock = Integer.parseInt(stockField.getText().trim());
                 p.setPrice(newPrice);
                 p.updateStock(newStock - p.getStock());
+                FileHandler.overwriteCatalog(HelloApplication.globalCatalog);
                 refreshList(seller);
             } catch (NumberFormatException ex) {
                 alert("Enter valid numbers.");
@@ -258,25 +264,22 @@ public class SellerDashScreen {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             seller.getShopCatalog().remove(p);
             HelloApplication.globalCatalog.remove(p);
+            FileHandler.overwriteCatalog(HelloApplication.globalCatalog);
             refreshList(seller);
         }
     }
 
     private static HBox buildNavBar() {
         HBox nav = new HBox();
-        nav.setStyle("-fx-background-color: " + NAVY + "; -fx-padding: 10 0;");
-        nav.setAlignment(Pos.CENTER);
+        nav.setStyle("-fx-background-color: " + NAVY + "; -fx-padding: 10 20;");
 
-        Button dashBtn   = makeNavBtn("🏪  Dashboard");
         Button logoutBtn = makeNavBtn("🚪  Logout");
         logoutBtn.setOnAction(e -> LoginScreen.show());
 
-        for (Button b : new Button[]{dashBtn, logoutBtn}) {
-            HBox.setHgrow(b, Priority.ALWAYS);
-            b.setMaxWidth(Double.MAX_VALUE);
-        }
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        nav.getChildren().addAll(dashBtn, logoutBtn);
+        nav.getChildren().addAll(spacer, logoutBtn);
         return nav;
     }
 
