@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<!--
+  login.fxml — Login screen layout
+
+  fx:controller links this file to LoginController.java.
+  fx:id values must exactly match @FXML field names in the controller.
+
+  VBox = vertical box (stacks children top-to-bottom)
+  HBox = horizontal box (stacks children left-to-right)
+-->
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.demo2.LoginController"
+      prefWidth="400" prefHeight="700"
+      style="-fx-background-color: #6B21A8;">
+
+    <!-- ═══ TOP PURPLE HEADER ════════════════════════════════════════ -->
+    <VBox alignment="CENTER"
+          style="-fx-padding: 70 20 50 20; -fx-background-color: #6B21A8;"
+          spacing="6">
+        <Label text="i-Bazaar"
+               style="-fx-font-size: 42px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+        <Label text="IIUM Campus Marketplace"
+               style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.7);"/>
+    </VBox>
+
+    <!-- ═══ WHITE FORM CARD ══════════════════════════════════════════ -->
+    <!--
+      VBox.vgrow="ALWAYS" makes this section expand to fill leftover space.
+      The -fx-background-radius top corners create the "floating card" look.
+    -->
+    <VBox VBox.vgrow="ALWAYS"
+          style="-fx-background-color: white;
+                 -fx-background-radius: 28 28 0 0;
+                 -fx-padding: 32 28 28 28;"
+          spacing="14">
+
+        <Label text="Welcome! Please login"
+               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1A1A2E;"/>
+
+        <!-- Name field -->
+        <VBox spacing="4">
+            <Label text="Full Name" styleClass="field-label"/>
+            <TextField fx:id="nameField" promptText="Enter your name" styleClass="input-field"/>
+        </VBox>
+
+        <!-- Matric field -->
+        <VBox spacing="4">
+            <Label text="Matric Number" styleClass="field-label"/>
+            <TextField fx:id="matricField" promptText="e.g. 2512913" styleClass="input-field"/>
+        </VBox>
+
+        <!-- Password field -->
+        <VBox spacing="4">
+            <Label text="Password" styleClass="field-label"/>
+            <!-- PasswordField masks input with dots -->
+            <PasswordField fx:id="passwordField" promptText="Enter password" styleClass="input-field"/>
+        </VBox>
+
+        <!-- Role radio buttons -->
+        <VBox spacing="8">
+            <Label text="I am a..." styleClass="field-label"/>
+            <HBox spacing="24">
+                <RadioButton fx:id="buyerRadio"  text="🛒  Buyer"  styleClass="role-radio"/>
+                <RadioButton fx:id="sellerRadio" text="🏪  Seller" styleClass="role-radio"/>
+            </HBox>
+        </VBox>
+
+        <!-- Error label — hidden until showError() is called in controller -->
+        <Label fx:id="errorLabel"
+               style="-fx-text-fill: #CC0000; -fx-font-size: 12px;"
+               visible="false" managed="false"/>
+
+        <!-- Login button — onAction="#handleLogin" calls handleLogin() in controller -->
+        <Button text="Login  →"
+                styleClass="primary-btn"
+                onAction="#handleLogin"
+                maxWidth="Infinity"/>
+
+    </VBox>
+</VBox>
